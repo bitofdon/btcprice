@@ -8,11 +8,74 @@
     body {
       background: black;
       color: white;
+      font-family: 'Verdana';
+      text-align: center;
     }
+    .the-price {
+      font-size: 35px;
+    }
+    .up {
+      color: green;
+    }
+    .noChange {
+      color: grey;
+    }
+    .down {
+      color: red;
+    }
+
   </style>
 
-  <body>
-    Current Price: BTC
-    <div class="the-price" id="price">$2796.93</div>
+  <body style="-webkit-app-region: drag">
+    <h3>Current Price: BTC</h3>
+    <div class="the-price" id="price"></div>
+    <div class="up-down" id="priceHistory"></div>
+
+    <script>
+      var request = require('request');
+      setInterval (function() {
+        request("https://www.bitstamp.net/api/v2/ticker/btcusd/", function(error, response, body) {
+          //body = body.slice(3); removes the first 3 characters of the json file
+          body = JSON.parse(body);
+          console.log(body);
+          newPrice(body);
+        });
+
+      }, 1000); //every second, it is going to run the request
+
+      var lastPrice;
+      function newPrice(arr) {
+        currentPrice = arr["last"];
+
+        var history = document.getElementById("priceHistory");
+        if (lastPrice<currentPrice) {
+          var newElText = "▲";
+          var wrap = document.createElement("span");
+          wrap.className="up";
+        }
+          else if (lastPrice == currentPrice) {
+            var newElText = "-";
+            var wrap = document.createElement("span");
+            wrap.className="noChange";
+          }
+
+            else {
+              var newElText = "▼";
+              var wrap = document.createElement("span");
+              wrap.className="down";
+            }
+
+        history.appendChild(wrap);
+        var textNode = document.createTextNode(newElText);
+        wrap.appendChild(textNode);
+        var nodeList = history.getElementsByTagName("SPAN").length;
+          if (nodeList==6){
+            history.children[0].remove();
+          }
+        //this get latest price
+        document.getElementById("price").innerHTML = currentPrice;
+        lastPrice = currentPrice;
+      }
+    </script>
   </body>
 </html>
